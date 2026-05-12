@@ -6,8 +6,21 @@ from fpdf import FPDF
 import io
 
 # הגדרות דף
-st.set_page_config(page_title="מחולל דאבל סופי", layout="centered")
-
+st.set_page_config(
+    page_title="מחולל דאבל אישי - יצירת משחק קלפים בעיצוב שלך",
+    page_icon="🎴",
+    layout="centered",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': """
+            ### מחולל דאבל אישי
+            האתר הזה נוצר כדי לעזור לכם ליצור משחקי דאבל מותאמים אישית בקלות.
+            פשוט מעלים תמונות, והאלגוריתם דואג לכל השאר!
+        """
+    }
+)
 # --- פונקציות עזר ---
 
 def generate_dobble_indices(n):
@@ -131,3 +144,11 @@ if uploaded_files and len(uploaded_files) >= total_needed:
 else:
     if uploaded_files:
         st.warning(f"חסרות עוד {total_needed - len(uploaded_files)} תמונות.")
+
+st.markdown("---")
+st.markdown("""
+### איך עובד מחולל הדאבל?
+המשחק מבוסס על עקרונות מתמטיים של **מישור פרויקטיבי סופי**. 
+כל שני קלפים במשחק מכילים בדיוק תמונה אחת משותפת. 
+זהו כלי נהדר ליצירת מתנות אישיות, משחקים לימי הולדת או עזרי למידה בגני ילדים ובבתי ספר.
+""")
