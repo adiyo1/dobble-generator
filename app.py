@@ -96,42 +96,52 @@ if uploaded_files and len(uploaded_files) >= total_needed:
         cols = st.columns(3)
         
         # יצירת הקלפים והצגתם
+        # יצירת הקלפים והצגתם
         for idx, card_indices in enumerate(deck_indices):
             # יצירת קנבס הקלף
             card_img = Image.new("RGBA", (500, 500), (255, 255, 255, 0))
             draw = ImageDraw.Draw(card_img)
             draw.ellipse([10, 10, 490, 490], fill="white", outline="black", width=3)
             
-            # פיזור סמלים בתוך הקלף
             num_on_card = len(card_indices)
+            
+            # --- חישוב פרמטרים דינמיים לפי כמות הסמלים ---
+            # ככל שיש יותר סמלים, נקטין אותם ונרחיב מעט את המעגל
+            if num_on_card <= 3:
+                size_factor, radius = 1.8, 100
+            elif num_on_card <= 4:
+                size_factor, radius = 2.0, 115
+            elif num_on_card <= 6:
+                size_factor, radius = 2.3, 130
+            else: # עבור 8 סמלים
+                size_factor, radius = 2.6, 145
+
             for i, symbol_idx in enumerate(card_indices):
                 symbol = images[symbol_idx].copy()
                 
-                # הקטנה יחסית של הסמלים כדי שלא יצאו מהמסגרת
-                size = int(500 / (math.sqrt(num_on_card) + 1.8)) 
-                symbol.thumbnail((size, size))
+                # חישוב גודל מקסימלי לסמל
+                max_dim = int(500 / (math.sqrt(num_on_card) + size_factor))
+                symbol.thumbnail((max_dim, max_dim))
                 
-                # סיבוב התמונה
+                # סיבוב רנדומלי
                 symbol = symbol.rotate(random.randint(0, 360), expand=True, resample=Image.BICUBIC)
                 
-                # חישוב מיקום מעגלי - צמצמנו את הרדיוס ל-100 כדי למרכז יותר
+                # חישוב מיקום מעגלי
                 angle = (i / num_on_card) * 2 * math.pi
-                radius = 100 
                 
-                # חישוב מרכז התמונה
+                # מיקום מרכז הסמל
                 center_x = 250 + int(radius * math.cos(angle))
                 center_y = 250 + int(radius * math.sin(angle))
                 
-                # חישוב הפינה (עבור paste) כך שהמרכז יהיה מדויק
+                # הדבקה לפי המרכז (כדי שתמונות לאורך/רוחב לא יברחו)
                 upper_left_x = center_x - (symbol.width // 2)
                 upper_left_y = center_y - (symbol.height // 2)
                 
-                # הדבקה עם התחשבות בשקיפות
                 card_img.paste(symbol, (upper_left_x, upper_left_y), symbol if symbol.mode == 'RGBA' else None)
+            
             # שמירה לרשימת ה-PDF והצגה באתר
             all_cards_for_pdf.append(card_img)
             cols[idx % 3].image(card_img, use_container_width=True)
-        
         # יצירת כפתור ההורדה - רק אחרי שהלולאה נגמרה והרשימה מלאה
         st.divider()
         pdf_bytes = export_to_pdf(all_cards_for_pdf)
